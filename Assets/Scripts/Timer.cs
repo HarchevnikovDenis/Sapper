@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Timer : MonoBehaviour
+public class Timer : MonoBehaviour      //Скрипт для отображения времени мгры
 {
     [SerializeField] private Text timeText;
     private float time;
@@ -22,7 +22,7 @@ public class Timer : MonoBehaviour
 
     private void Update()
     {
-        if (!BuildMap.isFirstStepDone)
+        if (!BuildMap.isFirstStepDone || BuildMap.isGameOver)   //Время начинает идти после первого хода и останавливается после ошибки
             return;
 
         time += Time.deltaTime;

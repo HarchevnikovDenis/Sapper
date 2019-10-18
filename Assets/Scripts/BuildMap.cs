@@ -6,15 +6,16 @@ public class BuildMap : MonoBehaviour
 {
     [SerializeField] private GameObject cellPrefab;
     private Vector3 startSpawnPosition;
-    private int count = 0;
-    public static bool[,] isOpen;
+    private int count = 0;                      //Кол-во мин вокруг ячеек
+    public static bool[,] isOpen;               //Открыта ли уже ячека
     private GameObject[,] cells;
     private int height;
     private int width;
-    public static bool isFirstStepDone;
-    public static string[,] field;
-    private int needCell;
-    private int openedCell;
+    public static bool isFirstStepDone;         //проверка выполнения первого хода
+    public static string[,] field;              //Массив символов, который характеризует кол-во мин вокруг ячейки
+    private int needCell;                       //Сколько ячеек должно быть открыто чтобы одержать победу
+    public static int openedCell;               //Сколько ячеек открыл игрок
+    public static bool isGameOver;              
 
     private void Awake()
     {
@@ -72,9 +73,14 @@ public class BuildMap : MonoBehaviour
                 cells[i, j].GetComponent<Cell>().j = j;
             }
         }
+
+        CameraMovement.minX = cells[0, 0].transform.position.x;
+        CameraMovement.maxX = cells[0, width - 1].transform.position.x;
+        CameraMovement.minZ = cells[height - 1, 0].transform.position.z;
+        CameraMovement.maxZ = cells[0, 0].transform.position.z;
     }
 
-    private string[,] RandomBoom()
+    private string[,] RandomBoom()          //Рандомная расстановка мин
     {
         for (int i = 0; i < height; i++)
         {
@@ -110,7 +116,7 @@ public class BuildMap : MonoBehaviour
         return field;
     }
 
-    private string[,] MinesCounter()
+    private string[,] MinesCounter()            //Составление карты поля
     {
         for (int i = 0; i < field.GetLength(0); i++)
         {
@@ -153,15 +159,27 @@ public class BuildMap : MonoBehaviour
         
     }
 
-    public void OpenNewCell(int i, int j)
+    public void OpenNewCell(int i, int j)           //Открытие ячеки при нажатии
     {
-        cells[i, j].GetComponent<Cell>().minesText.text = field[i, j].ToString();
+        if (cells[i, j].GetComponent<Cell>().isMarked)
+            return;
+        if(field[i,j] == "*")
+        {
+            cells[i, j].GetComponent<Cell>().OpenBomp();
+            cells[i, j].GetComponent<MeshRenderer>().material.color = Color.red;
+            GameOver();
+            return;
+        }
+        else
+        {
+            cells[i, j].GetComponent<Cell>().minesText.text = field[i, j].ToString();
+        }
         openedCell++;
         if (field[i, j] == "0")
             OpenArea(i, j);
     }
 
-    private void OpenArea(int i, int j)
+    private void OpenArea(int i, int j)         //Открытие большой зоны
     {
         Trying(i - 1, j - 1);
         Trying(i - 1, j);
@@ -194,5 +212,24 @@ public class BuildMap : MonoBehaviour
         {
             return;
         }
+    }
+
+    private void GameOver()         //Конец игры
+    {
+        for (int i = 0; i < height; i++)
+        {
+            for (int j = 0; j < width; j++)
+            {
+                if (isOpen[i, j] || field[i ,j] != "*")
+                    continue;
+
+                cells[i, j].GetComponent<Cell>().OpenBomp();
+                //TODO:  Вывести UI о проигрыше
+
+            }
+        }
+
+        isGameOver = true;
+        Debug.Log("GameOver");
     }
 }

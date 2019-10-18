@@ -5,10 +5,14 @@ using UnityEngine.UI;
 
 public class Cell : MonoBehaviour
 {
-    public Text minesText;
+    public Text minesText;              //Текст для отображения кол-ва мин вокруг ячейки
     public Color hoverColor;
     private Color standartColor;
     public Color openColor;
+    public bool isMarked = false;       //Помечена ли ячейка флагом
+
+    [SerializeField] private Image flagImg;
+    [SerializeField] private Image bombImage;
 
     [SerializeField] private Color color0;
     [SerializeField] private Color color1;
@@ -20,7 +24,7 @@ public class Cell : MonoBehaviour
     [SerializeField] private Color color7;
     [SerializeField] private Color color8;
 
-    public int i;
+    public int i;       //Индексы ячейки
     public int j;
 
     private void Start()
@@ -30,12 +34,28 @@ public class Cell : MonoBehaviour
 
     private void OnMouseOver()
     {
-        if(!BuildMap.isOpen[i, j])
-            gameObject.GetComponent<MeshRenderer>().material.color = hoverColor;
+        if (BuildMap.isOpen[i, j])
+            return;
 
-        if(Input.GetMouseButtonDown(1))
+        gameObject.GetComponent<MeshRenderer>().material.color = hoverColor;
+
+        if(Input.GetMouseButtonDown(1))     //Нажатие правой кнопки мыши(установка флага/снятие его)
         {
-            Debug.Log("Flag");
+            if (BuildMap.isGameOver)
+                return;
+            if(!flagImg.gameObject.activeSelf)
+            {
+                flagImg.gameObject.SetActive(true);
+                BuildMap.openedCell++;
+                isMarked = true;
+            }
+            else
+            {
+                flagImg.gameObject.SetActive(false);
+                BuildMap.openedCell--;
+                isMarked = false; 
+            }
+            
         }
     }
 
@@ -47,6 +67,9 @@ public class Cell : MonoBehaviour
 
     private void OnMouseDown()
     {
+        if (isMarked || BuildMap.isGameOver)
+            return;
+
         if (!BuildMap.isOpen[i, j])
         {
             BuildMap.isOpen[i, j] = true;
@@ -64,7 +87,10 @@ public class Cell : MonoBehaviour
 
             ColorText(i, j);
             
-            gameObject.GetComponent<MeshRenderer>().material.color = openColor;
+            if (BuildMap.field[i, j] != "*")
+            {
+                gameObject.GetComponent<MeshRenderer>().material.color = openColor;
+            }
         }
     }
 
@@ -100,5 +126,10 @@ public class Cell : MonoBehaviour
                 minesText.color = color8;
                 break;
         }
+    }
+
+    public void OpenBomp()
+    {
+        bombImage.gameObject.SetActive(true);
     }
 }

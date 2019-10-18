@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class GameOptions
 {
-    private static int width;
+    private static int width;       
     private static int height;
     private static int minesCount;  //  minesCount == falgsCount
 
