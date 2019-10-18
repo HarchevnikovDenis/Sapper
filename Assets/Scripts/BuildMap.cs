@@ -12,7 +12,9 @@ public class BuildMap : MonoBehaviour
     private int height;
     private int width;
     public static bool isFirstStepDone;
-    private string[,] field = null;
+    public static string[,] field;
+    private int needCell;
+    private int openedCell;
 
     private void Awake()
     {
@@ -41,6 +43,8 @@ public class BuildMap : MonoBehaviour
             }
         }
         cells = new GameObject[height, width];
+        needCell = width * height;
+        openedCell = 0;
 
         BuildField();
     }
@@ -97,7 +101,6 @@ public class BuildMap : MonoBehaviour
 
                         if (mines == GameOptions.MinesCount)
                         {
-                            Debug.Log(mines.ToString());
                             return field;
                         }
                     }
@@ -153,5 +156,43 @@ public class BuildMap : MonoBehaviour
     public void OpenNewCell(int i, int j)
     {
         cells[i, j].GetComponent<Cell>().minesText.text = field[i, j].ToString();
+        openedCell++;
+        if (field[i, j] == "0")
+            OpenArea(i, j);
+    }
+
+    private void OpenArea(int i, int j)
+    {
+        Trying(i - 1, j - 1);
+        Trying(i - 1, j);
+        Trying(i - 1, j + 1);
+        Trying(i, j - 1);
+        Trying(i, j + 1);
+        Trying(i + 1, j - 1);
+        Trying(i + 1, j);
+        Trying(i + 1, j + 1);
+    }
+
+    private void Trying(int i, int j)
+    {
+        try
+        {
+            if (isOpen[i, j])
+                return;
+            isOpen[i, j] = true;
+            cells[i, j].GetComponent<MeshRenderer>().material.color = cells[i, j].GetComponent<Cell>().openColor;
+            cells[i, j].GetComponent<Cell>().ColorText(i, j);
+            OpenNewCell(i, j);
+            if (field[i, j] != "0")
+                return;
+            else
+            {
+                OpenArea(i, j);
+            }
+        }
+        catch (System.IndexOutOfRangeException)
+        {
+            return;
+        }
     }
 }
