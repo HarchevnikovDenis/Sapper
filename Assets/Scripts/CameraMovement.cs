@@ -14,7 +14,7 @@ public class CameraMovement : MonoBehaviour
     public static float maxZ;
 
     
-    void Update()
+    void Update()   //Определение позиции камеры (ограничение ее позиции)
     {
         if (GameMenu.isPaused)
             return;
@@ -26,11 +26,8 @@ public class CameraMovement : MonoBehaviour
         pos.x += inputX * speedMove * Time.deltaTime;
         pos.z += inputZ * speedMove * Time.deltaTime;
 
-        //Vector3 movement = new Vector3(1 * inputX, 0, 1 * inputZ);
         pos.x = Mathf.Clamp(pos.x, minX, maxX);
         pos.z = Mathf.Clamp(pos.z, minZ, maxZ);
-
-        //transform.Translate(movement * Time.deltaTime * speedMove, Space.World);
 
         float scrollWheel = Input.GetAxis("Mouse ScrollWheel");
         pos.y -= scrollWheel * scrollSpeed * Time.deltaTime * 25;

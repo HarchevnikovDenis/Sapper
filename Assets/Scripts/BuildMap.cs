@@ -13,19 +13,20 @@ public class BuildMap : MonoBehaviour
     private int width;
     public static bool isFirstStepDone;         //проверка выполнения первого хода
     public static string[,] field;              //Массив символов, который характеризует кол-во мин вокруг ячейки
-    private int needCell;                       //Сколько ячеек должно быть открыто чтобы одержать победу
+    public static int needCell;                       //Сколько ячеек должно быть открыто чтобы одержать победу
     public static int openedCell;               //Сколько ячеек открыл игрок
-    public static bool isGameOver;              
+    public static bool isGameOver;
+    public static int flagsCount;
 
     private void Awake()
     {
-        GameOptions.Width = 30;
-        GameOptions.Height = 16;
-        GameOptions.MinesCount = 99;
+        isFirstStepDone = false;
+        isGameOver = false;
         startSpawnPosition = Vector3.zero;
 
         height = GameOptions.Height;
         width = GameOptions.Width;
+        flagsCount = GameOptions.MinesCount;
 
         isOpen = new bool[height, width];
         for (int i = 0; i < height; i++)
@@ -64,11 +65,6 @@ public class BuildMap : MonoBehaviour
             {
                 Vector3 offset = new Vector3(1.55f * j, 0, -1.55f * i);
                 cells[i, j] = Instantiate(cellPrefab, startSpawnPosition + offset, Quaternion.identity);
-
-                /*if (field[i, j] == "*")
-                    cells[i ,j].GetComponent<MeshRenderer>().material.color = Color.red;*/
-                //cells[i, j].GetComponent<Cell>().minesText.text = field[i, j].ToString();
-
                 cells[i, j].GetComponent<Cell>().i = i;
                 cells[i, j].GetComponent<Cell>().j = j;
             }
@@ -100,7 +96,7 @@ public class BuildMap : MonoBehaviour
                     if (isOpen[i, j])
                         continue;
                     float chance = Random.Range(0.0f, 1.0f);
-                    if (chance >= 0.9f)
+                    if (chance >= 0.95f)
                     {
                         field[i, j] = "*";
                         mines++;
@@ -135,9 +131,6 @@ public class BuildMap : MonoBehaviour
                     CountMines(i + 1, j + 1, field);
                     field[i, j] = count.ToString();
                 }
-                /*cells[i, j].GetComponent<Cell>().minesText.text = field[i, j].ToString();
-                if (field[i, j] == "*")
-                    cells[i, j].GetComponent<MeshRenderer>().material.color = Color.red;*/
             }
         }
         return field;
@@ -224,12 +217,9 @@ public class BuildMap : MonoBehaviour
                     continue;
 
                 cells[i, j].GetComponent<Cell>().OpenBomp();
-                //TODO:  Вывести UI о проигрыше
-
             }
         }
 
         isGameOver = true;
-        Debug.Log("GameOver");
     }
 }

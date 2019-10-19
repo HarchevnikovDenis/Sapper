@@ -34,28 +34,32 @@ public class Cell : MonoBehaviour
 
     private void OnMouseOver()
     {
-        if (BuildMap.isOpen[i, j])
+        if (BuildMap.isOpen[i, j] || GameMenu.isPaused || BuildMap.isGameOver)
             return;
 
         gameObject.GetComponent<MeshRenderer>().material.color = hoverColor;
 
         if(Input.GetMouseButtonDown(1))     //Нажатие правой кнопки мыши(установка флага/снятие его)
         {
-            if (BuildMap.isGameOver)
+            if (BuildMap.isGameOver || BuildMap.flagsCount <= 0)
                 return;
             if(!flagImg.gameObject.activeSelf)
             {
                 flagImg.gameObject.SetActive(true);
                 BuildMap.openedCell++;
                 isMarked = true;
+                BuildMap.flagsCount--;
             }
             else
             {
                 flagImg.gameObject.SetActive(false);
                 BuildMap.openedCell--;
-                isMarked = false; 
+                isMarked = false;
+                BuildMap.flagsCount++;
             }
-            
+            Timer timer = FindObjectOfType<Timer>();
+            if (timer != null)
+                timer.RefreshCountFlagsCount();
         }
     }
 
@@ -67,7 +71,7 @@ public class Cell : MonoBehaviour
 
     private void OnMouseDown()
     {
-        if (isMarked || BuildMap.isGameOver)
+        if (isMarked || BuildMap.isGameOver || GameMenu.isPaused)
             return;
 
         if (!BuildMap.isOpen[i, j])
@@ -90,6 +94,12 @@ public class Cell : MonoBehaviour
             if (BuildMap.field[i, j] != "*")
             {
                 gameObject.GetComponent<MeshRenderer>().material.color = openColor;
+            }
+
+            if(BuildMap.flagsCount+BuildMap.openedCell == BuildMap.needCell)
+            {
+                GameMenu gameMenu = FindObjectOfType<GameMenu>();
+                gameMenu.Win();
             }
         }
     }
